@@ -30,7 +30,7 @@ type SolInfo struct {
 	SolFileContent string `json:"solFileContent"`
 }
 
-const rootDir = "./datatype/"
+const rootDir = "./data/"
 
 func main() {
 	http.HandleFunc("/solidity/", processSol)
