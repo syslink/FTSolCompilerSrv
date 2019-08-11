@@ -43,6 +43,7 @@ func processSol(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")             //返回数据格式是json
 
 	r.ParseForm() //解析参数，默认是不会解析的
+	fmt.Printf("request from: %s\n", r.RemoteAddr)
 	if r.Method == "POST" {
 		result, _ := ioutil.ReadAll(r.Body)
 		r.Body.Close()
