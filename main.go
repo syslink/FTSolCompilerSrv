@@ -23,14 +23,14 @@ const (
 )
 
 type SolInfo struct {
-	Type OpSolType
-	AccountName string
-	SolFileName string
-	NewSolFileName string
-	SolFileContent string
+	Type OpSolType `json:"type"`
+	AccountName string `json:"accountName"`
+	SolFileName string `json:"solFileName"`
+	NewSolFileName string `json:"newSolFileName"`
+	SolFileContent string `json:"solFileContent"`
 }
 
-const rootDir = "./data/"
+const rootDir = "./datatype/"
 
 func main() {
 	http.HandleFunc("/solidity/", processSol)
@@ -38,6 +38,10 @@ func main() {
 }
 
 func processSol(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
+	w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
+	w.Header().Set("content-type", "application/json")             //返回数据格式是json
+
 	r.ParseForm() //解析参数，默认是不会解析的
 	if r.Method == "POST" {
 		result, _ := ioutil.ReadAll(r.Body)
