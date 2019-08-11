@@ -50,7 +50,7 @@ func processSol(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("%s\n", result)
 
 		var solInfo SolInfo
-		json.Unmarshal([]byte(result), solInfo)
+		json.Unmarshal([]byte(result), &solInfo)
 		fmt.Printf("%d %s : %s->%s [%s]\n", solInfo.Type, solInfo.AccountName, solInfo.SolFileName, solInfo.NewSolFileName, solInfo.SolFileContent)
 
 		switch solInfo.Type {
