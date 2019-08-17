@@ -10,6 +10,9 @@ import (
 	"os"
 	"crypto/sha256"
 	"encoding/hex"
+	"bytes"
+	"os/exec"
+	"time"
 )
 type OpSolType int32
 
@@ -91,12 +94,32 @@ func addSolHandler(w http.ResponseWriter, accountName string, solFileName string
 		responseErr(w, err.Error())
 		return
 	}
+
 	defer file.Close()
 	formatter.JSON(w, http.StatusOK, struct {
 		Result bool `json:"result"`
 	}{Result: true})
 	return
 }
+
+//func createSolFile(folderPath string, fileName string) (file *File, err error) {
+//	if _, err = os.Stat(folderPath); os.IsNotExist(err) {
+//		// 必须分成两步：先创建文件夹、再修改权限
+//		err = os.MkdirAll(folderPath, 0777) //0777也可以os.ModePerm
+//		if err != nil {
+//			return nil, err
+//		}
+//		err = os.Chmod(folderPath, 0777)
+//		if err != nil {
+//			return nil, err
+//		}
+//	}
+//	file, err = os.Create(folderPath + "/" + fileName)
+//	if err != nil{
+//		return nil, err
+//	}
+//	return file, nil
+//}
 
 func updateSolHandler(w http.ResponseWriter, accountName string, solFileName string, solFileContent string) {
 	var formatter render.Render
@@ -172,7 +195,68 @@ func renameSolHandler(w http.ResponseWriter, accountName string, oldSolFileName 
 	}{Result: true})
 }
 
+type ContractInfo struct {
+	Name string `json:"name"`
+	Abi string `json:"abi"`
+	Bin string `json:"bin"`
+}
+
 func compileSolHandler(w http.ResponseWriter, accountName string, solFileName string) {
+	now := time.Now().Unix()
+	cmd := exec.Command("solc", "--abi", "--bin", "-o", "./" + accountName, "--overwrite", accountName + "/" + solFileName)
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil {
+		responseErr(w, stderr.String())
+	} else {
+		files, err := ioutil.ReadDir("./" + accountName)
+		if err != nil {
+			responseErr(w, err.Error())
+			return
+		}
+		contractInfoMap := make(map[string]ContractInfo)
+		for _, file := range files {
+			if !file.IsDir() {
+				fileName := file.Name()
+				fileTime := file.ModTime().Unix()
+				fileContent, err := ioutil.ReadFile(accountName + "/" + solFileName)
+				if err != nil {
+					responseErr(w, err.Error())
+					return
+				}
+				if fileTime >= now {
+					if strings.HasSuffix(fileName, ".bin") {
+						contractName := fileName[0:len(fileName) - 4]
+						if _, ok := contractInfoMap[contractName]; ok {
+							contractInfo := contractInfoMap[contractName]
+							contractInfo.Bin = string(fileContent)
+							contractInfoMap[contractName] = contractInfo
+						} else {
+							contractInfo := ContractInfo{Name: contractName, Bin: string(fileContent), Abi: ""}
+							contractInfoMap[contractName] = contractInfo
+						}
+					}
+					if strings.HasSuffix(fileName, ".abi") {
+						contractName := fileName[0:len(fileName) - 4]
+						if _, ok := contractInfoMap[contractName]; ok {
+							contractInfo := contractInfoMap[contractName]
+							contractInfo.Abi = string(fileContent)
+							contractInfoMap[contractName] = contractInfo
+						} else {
+							contractInfo := ContractInfo{Name: contractName, Bin: "", Abi: string(fileContent)}
+							contractInfoMap[contractName] = contractInfo
+						}
+					}
+				}
+			}
+		}
+		var formatter render.Render
+		formatter.JSON(w, http.StatusOK, contractInfoMap)
+	}
 
 }
 
