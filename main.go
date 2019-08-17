@@ -102,31 +102,34 @@ func addSolHandler(w http.ResponseWriter, accountName string, solFileName string
 	return
 }
 
-//func createSolFile(folderPath string, fileName string) (file *File, err error) {
-//	if _, err = os.Stat(folderPath); os.IsNotExist(err) {
-//		// 必须分成两步：先创建文件夹、再修改权限
-//		err = os.MkdirAll(folderPath, 0777) //0777也可以os.ModePerm
-//		if err != nil {
-//			return nil, err
-//		}
-//		err = os.Chmod(folderPath, 0777)
-//		if err != nil {
-//			return nil, err
-//		}
-//	}
-//	file, err = os.Create(folderPath + "/" + fileName)
-//	if err != nil{
-//		return nil, err
-//	}
-//	return file, nil
-//}
+func createSolFile(folderPath string, fileName string) (err error) {
+	if _, err = os.Stat(folderPath); os.IsNotExist(err) {
+		// 必须分成两步：先创建文件夹、再修改权限
+		err = os.MkdirAll(folderPath, 0777) //0777也可以os.ModePerm
+		if err != nil {
+			return err
+		}
+		err = os.Chmod(folderPath, 0777)
+		if err != nil {
+			return err
+		}
+	}
+	_, err = os.Create(folderPath + "/" + fileName)
+	if err != nil{
+		return err
+	}
+	return nil
+}
 
 func updateSolHandler(w http.ResponseWriter, accountName string, solFileName string, solFileContent string) {
 	var formatter render.Render
 	filePath := rootDir + accountName + "/" + solFileName
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		responseErr(w, err.Error())
-		return
+		err = createSolFile(rootDir + accountName, solFileName)
+		if err != nil {
+			responseErr(w, err.Error())
+			return
+		}
 	}
 	file, err := os.OpenFile(filePath, os.O_RDWR,0777)
 	if err != nil{
