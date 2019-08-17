@@ -213,7 +213,7 @@ type ContractInfo struct {
 
 func compileSolHandler(w http.ResponseWriter, accountName string, solFileName string) {
 	now := time.Now().Unix()
-	cmd := exec.Command("solc", "--abi", "--bin", "-o", "./" + accountName, "--overwrite", accountName + "/" + solFileName)
+	cmd := exec.Command("solc", "--abi", "--bin", "-o", "./" + accountName, "--overwrite", rootDir + accountName + "/" + solFileName)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
@@ -223,7 +223,7 @@ func compileSolHandler(w http.ResponseWriter, accountName string, solFileName st
 	if err != nil {
 		responseErr(w, stderr.String())
 	} else {
-		files, err := ioutil.ReadDir("./" + accountName)
+		files, err := ioutil.ReadDir(rootDir + accountName)
 		if err != nil {
 			responseErr(w, err.Error())
 			return
@@ -233,7 +233,7 @@ func compileSolHandler(w http.ResponseWriter, accountName string, solFileName st
 			if !file.IsDir() {
 				fileName := file.Name()
 				fileTime := file.ModTime().Unix()
-				fileContent, err := ioutil.ReadFile(accountName + "/" + solFileName)
+				fileContent, err := ioutil.ReadFile(rootDir + accountName + "/" + solFileName)
 				if err != nil {
 					responseErr(w, err.Error())
 					return
