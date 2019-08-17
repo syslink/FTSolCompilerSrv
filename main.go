@@ -213,7 +213,7 @@ type ContractInfo struct {
 
 func compileSolHandler(w http.ResponseWriter, accountName string, solFileName string) {
 	now := time.Now().Unix()
-	cmd := exec.Command("solc", "--abi", "--bin", "-o", "./" + accountName, "--overwrite", rootDir + accountName + "/" + solFileName)
+	cmd := exec.Command("solc", "--abi", "--bin", "-o", rootDir + accountName, "--overwrite", rootDir + accountName + "/" + solFileName)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
