@@ -264,6 +264,8 @@ func compileSolHandler(w http.ResponseWriter, accountName string, solFileName st
 				}
 			}
 		}
+		json, _ := json.Marshal(contractInfoMap)
+		fmt.Printf(json)
 		var formatter render.Render
 		formatter.JSON(w, http.StatusOK, contractInfoMap)
 	}
