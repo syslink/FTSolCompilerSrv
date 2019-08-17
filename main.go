@@ -233,7 +233,7 @@ func compileSolHandler(w http.ResponseWriter, accountName string, solFileName st
 			if !file.IsDir() {
 				fileName := file.Name()
 				fileTime := file.ModTime().Unix()
-				fileContent, err := ioutil.ReadFile(rootDir + accountName + "/" + solFileName)
+				fileContent, err := ioutil.ReadFile(rootDir + accountName + "/" + fileName)
 				if err != nil {
 					responseErr(w, err.Error())
 					return
