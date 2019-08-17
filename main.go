@@ -145,16 +145,26 @@ func updateSolHandler(w http.ResponseWriter, accountName string, solFileName str
 }
 
 func listSolHandler(w http.ResponseWriter, accountName string) {
+	var formatter render.Render
 	fileNameList := make([]string, 0)
 	hash := sha256.New()
-	files, _ := ioutil.ReadDir(rootDir + accountName)
+	files, err := ioutil.ReadDir(rootDir + accountName)
+	if err != nil {
+		if os.IsNotExist(err) {
+			formatter.JSON(w, http.StatusOK, struct {
+				Result []string `json:"result"`
+			}{Result: fileNameList})
+		} else {
+			responseErr(w, err.Error())
+		}
+		return
+	}
 	for _, f := range files {
 		bSolFile := strings.HasSuffix(f.Name(), ".sol")
 		if bSolFile {
 			hashedFileName := hex.EncodeToString(hash.Sum([]byte(f.Name())))
 			fileNameList = append(fileNameList, hashedFileName)
 		}
-		var formatter render.Render
 		formatter.JSON(w, http.StatusOK, struct {
 			Result []string `json:"result"`
 		}{Result: fileNameList})
