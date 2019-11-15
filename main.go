@@ -34,6 +34,7 @@ type SolInfo struct {
 }
 
 const rootDir = "./data/"
+const libDir = "/usr/local/lib/solidity/"
 
 func main() {
 	http.HandleFunc("/solidity/", processSol)
@@ -131,7 +132,7 @@ func updateSolHandler(w http.ResponseWriter, accountName string, solFileName str
 			return
 		}
 	}
-	file, err := os.OpenFile(filePath, os.O_RDWR,0777)
+	file, err := os.OpenFile(filePath, os.O_RDWR | os.O_TRUNC,0777)
 	if err != nil{
 		responseErr(w, err.Error())
 		return
@@ -216,7 +217,7 @@ type ContractInfo struct {
 
 func compileSolHandler(w http.ResponseWriter, accountName string, solFileName string) {
 	now := time.Now().Unix()
-	cmd := exec.Command("solc", "--abi", "--bin", "-o", rootDir + accountName, "--overwrite", rootDir + accountName + "/" + solFileName)
+	cmd := exec.Command("solc", "/libs/=" + libDir, "--abi", "--bin", "-o", rootDir + accountName, "--overwrite", rootDir + accountName + "/" + solFileName)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
