@@ -58,7 +58,7 @@ func querySolFile(dir string) (error, map[string]string) {
 		bSolFile := strings.HasSuffix(f.Name(), ".sol")
 		if bSolFile {
 			fmt.Println("sol file: %s", f.Name())
-			fileContent, err := ioutil.ReadFile(libDir + f.Name())
+			fileContent, err := ioutil.ReadFile(dir + f.Name())
 			if err != nil {
 				fmt.Println(string(err.Error()))
 				continue
