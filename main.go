@@ -36,42 +36,70 @@ type SolInfo struct {
 
 const rootDir = "./data/"
 const libDir = "/usr/local/lib/solidity/"
+const sampleDir = libDir + "samples/"
 
 func main() {
 	var port int
 	flag.IntVar(&port, "p", 8888, "端口号，默认为8888")
 	http.HandleFunc("/solidity/", processSol)
+	http.HandleFunc("/sampleCodeList/", querySampleCode)
 	http.HandleFunc("/libsList/", queryLibs)
 	portStr := fmt.Sprintf(":%d", port)
 	http.ListenAndServe(portStr, nil)
 }
-func queryLibs(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
-	w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
-	w.Header().Set("content-type", "application/json")             //返回数据格式是json
 
-	r.ParseForm()
-	var formatter render.Render
-	files, err := ioutil.ReadDir(libDir)
+func querySolFile(dir string) (error, map[string]string) {
+	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		responseErr(w, err.Error())
-		return
+		return err, null
 	}
-	libSolMap := make(map[string]string)
+	solFileMap := make(map[string]string)
 	for _, f := range files {
 		bSolFile := strings.HasSuffix(f.Name(), ".sol")
 		if bSolFile {
+			fmt.Printf("sol file: %s", f.Name())
 			fileContent, err := ioutil.ReadFile(libDir + f.Name())
 			if err != nil {
 				fmt.Printf(string(err.Error()))
 				continue
 			}
 			fileContentStr := string(fileContent)
-			libSolMap[f.Name()] = fileContentStr
+			solFileMap[f.Name()] = fileContentStr
 		}
 	}
-	formatter.JSON(w, http.StatusOK, libSolMap)
+	return null, solFileMap
 }
+
+func querySampleCode(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("query libs")
+	w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
+	w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
+	w.Header().Set("content-type", "application/json")             //返回数据格式是json
+
+	var formatter render.Render
+	err, fileInfoMap := querySolFile(sampleDir)
+	if err != nil {
+		responseErr(w, err.Error())
+		return
+	}
+	formatter.JSON(w, http.StatusOK, fileInfoMap)
+}
+
+func queryLibs(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("query libs")
+	w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
+	w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
+	w.Header().Set("content-type", "application/json")             //返回数据格式是json
+
+	var formatter render.Render
+	err, fileInfoMap := querySolFile(libDir)
+	if err != nil {
+		responseErr(w, err.Error())
+		return
+	}
+	formatter.JSON(w, http.StatusOK, fileInfoMap)
+}
+
 func processSol(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
 	w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
