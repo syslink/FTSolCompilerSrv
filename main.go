@@ -13,6 +13,7 @@ import (
 	"bytes"
 	"os/exec"
 	"time"
+	"flag"
 )
 type OpSolType int32
 
@@ -37,10 +38,40 @@ const rootDir = "./data/"
 const libDir = "/usr/local/lib/solidity/"
 
 func main() {
+	var port int
+	flag.IntVar(&port, "p", 8888, "端口号，默认为8888")
 	http.HandleFunc("/solidity/", processSol)
-	http.ListenAndServe(":8888", nil)
+	http.HandleFunc("/libsList/", queryLibs)
+	portStr := fmt.Sprintf(":%d", port)
+	http.ListenAndServe(portStr, nil)
 }
+func queryLibs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
+	w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
+	w.Header().Set("content-type", "application/json")             //返回数据格式是json
 
+	r.ParseForm()
+	var formatter render.Render
+	files, err := ioutil.ReadDir(libDir)
+	if err != nil {
+		responseErr(w, err.Error())
+		return
+	}
+	libSolMap := make(map[string]string)
+	for _, f := range files {
+		bSolFile := strings.HasSuffix(f.Name(), ".sol")
+		if bSolFile {
+			fileContent, err := ioutil.ReadFile(libDir + f.Name())
+			if err != nil {
+				fmt.Printf(string(err.Error()))
+				continue
+			}
+			fileContentStr := string(fileContent)
+			libSolMap[f.Name()] = fileContentStr
+		}
+	}
+	formatter.JSON(w, http.StatusOK, libSolMap)
+}
 func processSol(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
 	w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
