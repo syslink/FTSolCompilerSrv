@@ -51,7 +51,7 @@ func main() {
 func querySolFile(dir string) (error, map[string]string) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		return err, null
+		return err, nil
 	}
 	solFileMap := make(map[string]string)
 	for _, f := range files {
@@ -67,7 +67,7 @@ func querySolFile(dir string) (error, map[string]string) {
 			solFileMap[f.Name()] = fileContentStr
 		}
 	}
-	return null, solFileMap
+	return nil, solFileMap
 }
 
 func querySampleCode(w http.ResponseWriter, r *http.Request) {
