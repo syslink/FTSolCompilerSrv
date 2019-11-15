@@ -57,10 +57,10 @@ func querySolFile(dir string) (error, map[string]string) {
 	for _, f := range files {
 		bSolFile := strings.HasSuffix(f.Name(), ".sol")
 		if bSolFile {
-			fmt.Printf("sol file: %s", f.Name())
+			fmt.Println("sol file: %s", f.Name())
 			fileContent, err := ioutil.ReadFile(libDir + f.Name())
 			if err != nil {
-				fmt.Printf(string(err.Error()))
+				fmt.Println(string(err.Error()))
 				continue
 			}
 			fileContentStr := string(fileContent)
@@ -71,7 +71,7 @@ func querySolFile(dir string) (error, map[string]string) {
 }
 
 func querySampleCode(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("query libs")
+	fmt.Println("query samples")
 	w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
 	w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
 	w.Header().Set("content-type", "application/json")             //返回数据格式是json
@@ -86,7 +86,7 @@ func querySampleCode(w http.ResponseWriter, r *http.Request) {
 }
 
 func queryLibs(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("query libs")
+	fmt.Println("query libs")
 	w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
 	w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
 	w.Header().Set("content-type", "application/json")             //返回数据格式是json
@@ -106,15 +106,15 @@ func processSol(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")             //返回数据格式是json
 
 	r.ParseForm() //解析参数，默认是不会解析的
-	fmt.Printf("request from: %s\n", r.RemoteAddr)
+	fmt.Println("request from: %s\n", r.RemoteAddr)
 	if r.Method == "POST" {
 		result, _ := ioutil.ReadAll(r.Body)
 		r.Body.Close()
-		fmt.Printf("%s\n", result)
+		fmt.Println("%s\n", result)
 
 		var solInfo SolInfo
 		json.Unmarshal([]byte(result), &solInfo)
-		fmt.Printf("%d %s : %s->%s [%s]\n", solInfo.Type, solInfo.AccountName, solInfo.SolFileName, solInfo.NewSolFileName, solInfo.SolFileContent)
+		fmt.Println("%d %s : %s->%s [%s]\n", solInfo.Type, solInfo.AccountName, solInfo.SolFileName, solInfo.NewSolFileName, solInfo.SolFileContent)
 
 		switch solInfo.Type {
 			case AddSol:
@@ -328,7 +328,7 @@ func compileSolHandler(w http.ResponseWriter, accountName string, solFileName st
 			}
 		}
 		json, _ := json.Marshal(contractInfoMap)
-		fmt.Printf(string(json))
+		fmt.Println(string(json))
 		var formatter render.Render
 		formatter.JSON(w, http.StatusOK, contractInfoMap)
 	}
