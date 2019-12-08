@@ -22,8 +22,8 @@ const (
 	ListSol OpSolType = 3
 	RenameSol OpSolType = 4
 	CompileSol OpSolType = 5
-	ListShareSol OpSolType = 6
-	GetShareSol OpSolType = 7
+	ListSharedAccount OpSolType = 6
+	GetSharedSol OpSolType = 7
 )
 
 type SolInfo struct {
@@ -131,9 +131,9 @@ func processSol(w http.ResponseWriter, r *http.Request) {
 				renameSolHandler(w, solInfo.AccountName, solInfo.SolFileName, solInfo.NewSolFileName)
 			case CompileSol:
 				compileSolHandler(w, solInfo.AccountName, solInfo.SolFileName)
-			case ListShareSol:
+			case ListSharedAccount:
 				listSharedSolHandler(w, solInfo.AccountName, solInfo.SharedAccountName)
-			case GetShareSol:
+			case GetSharedSol:
 				getSharedSolHandler(w, solInfo.AccountName, solInfo.SharedAccountName, solInfo.SolFileName)
 		}
 	}
