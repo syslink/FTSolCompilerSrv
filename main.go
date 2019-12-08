@@ -8,8 +8,6 @@ import (
 	"strings"
 	"github.com/unrolled/render"
 	"os"
-	"crypto/sha256"
-	"encoding/hex"
 	"bytes"
 	"os/exec"
 	"time"
@@ -24,11 +22,14 @@ const (
 	ListSol OpSolType = 3
 	RenameSol OpSolType = 4
 	CompileSol OpSolType = 5
+	ListShareSol OpSolType = 6
+	GetShareSol OpSolType = 7
 )
 
 type SolInfo struct {
 	Type OpSolType `json:"type"`
 	AccountName string `json:"accountName"`
+	SharedAccountName string `json:"sharedAccountName"`
 	SolFileName string `json:"solFileName"`
 	NewSolFileName string `json:"newSolFileName"`
 	SolFileContent string `json:"solFileContent"`
@@ -114,7 +115,8 @@ func processSol(w http.ResponseWriter, r *http.Request) {
 
 		var solInfo SolInfo
 		json.Unmarshal([]byte(result), &solInfo)
-		fmt.Println("%d %s : %s->%s [%s]\n", solInfo.Type, solInfo.AccountName, solInfo.SolFileName, solInfo.NewSolFileName, solInfo.SolFileContent)
+		fmt.Println("%d %s %s : %s->%s [%s]\n", solInfo.Type, solInfo.AccountName, solInfo.SharedAccountName,
+			solInfo.SolFileName, solInfo.NewSolFileName, solInfo.SolFileContent)
 
 		switch solInfo.Type {
 			case AddSol:
@@ -129,6 +131,10 @@ func processSol(w http.ResponseWriter, r *http.Request) {
 				renameSolHandler(w, solInfo.AccountName, solInfo.SolFileName, solInfo.NewSolFileName)
 			case CompileSol:
 				compileSolHandler(w, solInfo.AccountName, solInfo.SolFileName)
+			case ListShareSol:
+				listSharedSolHandler(w, solInfo.AccountName, solInfo.SharedAccountName)
+			case GetShareSol:
+				getSharedSolHandler(w, solInfo.AccountName, solInfo.SharedAccountName, solInfo.SolFileName)
 		}
 	}
 }
@@ -210,7 +216,7 @@ func updateSolHandler(w http.ResponseWriter, accountName string, solFileName str
 func listSolHandler(w http.ResponseWriter, accountName string) {
 	var formatter render.Render
 	fileNameList := make([]string, 0)
-	hash := sha256.New()
+	//hash := sha256.New()
 	files, err := ioutil.ReadDir(rootDir + accountName)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -225,13 +231,65 @@ func listSolHandler(w http.ResponseWriter, accountName string) {
 	for _, f := range files {
 		bSolFile := strings.HasSuffix(f.Name(), ".sol")
 		if bSolFile {
-			hashedFileName := hex.EncodeToString(hash.Sum([]byte(f.Name())))
-			fileNameList = append(fileNameList, hashedFileName)
+			//hashedFileName := hex.EncodeToString(hash.Sum([]byte(f.Name())))
+			fileNameList = append(fileNameList, f.Name())
 		}
 		formatter.JSON(w, http.StatusOK, struct {
 			Result []string `json:"result"`
 		}{Result: fileNameList})
 	}
+}
+
+func checkAccountBeShared(accountName string, sharedAccountName string) (bool) {
+	return true
+}
+
+func listSharedSolHandler(w http.ResponseWriter, accountName string, sharedAccountName string) {
+	if !checkAccountBeShared(accountName, sharedAccountName) {
+		responseErr(w, "No authority to access.")
+		return
+	}
+	var formatter render.Render
+	fileNameList := make([]string, 0)
+	files, err := ioutil.ReadDir(rootDir + sharedAccountName)
+	if err != nil {
+		if os.IsNotExist(err) {
+			formatter.JSON(w, http.StatusOK, struct {
+				Result []string `json:"result"`
+			}{Result: fileNameList})
+		} else {
+			responseErr(w, err.Error())
+		}
+		return
+	}
+	for _, f := range files {
+		fileNameList = append(fileNameList, f.Name())
+	}
+	formatter.JSON(w, http.StatusOK, struct {
+		Result []string `json:"result"`
+	}{Result: fileNameList})
+}
+
+func getSharedSolHandler(w http.ResponseWriter, accountName string, sharedAccountName string, solFileName string) {
+	if !checkAccountBeShared(accountName, sharedAccountName) {
+		responseErr(w, "No authority to access.")
+		return
+	}
+	var formatter render.Render
+	filePath := rootDir + sharedAccountName + "/" + solFileName
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		responseErr(w, err.Error())
+		return
+	}
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		responseErr(w, err.Error())
+		return
+	}
+
+	formatter.JSON(w, http.StatusOK, struct {
+		Result string `json:"result"`
+	}{Result: string(data)})
 }
 
 func delSolHandler(w http.ResponseWriter, accountName string, solFileName string) {
