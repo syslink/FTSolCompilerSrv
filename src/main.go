@@ -11,7 +11,6 @@ import (
 	"bytes"
 	"os/exec"
 	"time"
-	. "../dbEntity"
 	"flag"
 )
 type OpSolType int32
