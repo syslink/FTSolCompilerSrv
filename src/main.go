@@ -431,9 +431,9 @@ func compileSolHandler(w http.ResponseWriter, chainName string, accountName stri
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 
-	fmt.Println("Start to compile:" + cmd.String())
+	fmt.Println("Start to compile")
 	err := cmd.Run()
-	fmt.Println("Finish compiling:" + cmd.String())
+	fmt.Println("Finish compiling")
 	if err != nil {
 		responseErr(w, stderr.String())
 	} else {
