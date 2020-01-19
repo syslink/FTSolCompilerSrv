@@ -280,7 +280,7 @@ func updateSolHandler(w http.ResponseWriter, chainName string, accountName strin
 	var formatter render.Render
 	filePath := rootDir + chainName + "/" + accountName + "/" + solFileName
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		err = createSolFile(rootDir + accountName, solFileName)
+		err = createSolFile(rootDir + chainName + "/" + accountName, solFileName)
 		if err != nil {
 			responseErr(w, err.Error())
 			return

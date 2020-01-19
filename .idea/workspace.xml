@@ -40,8 +40,8 @@
       <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="339">
-              <caret line="184" column="65" selection-start-line="184" selection-start-column="65" selection-end-line="184" selection-end-column="65" />
+            <state relative-caret-position="228">
+              <caret line="299" column="45" lean-forward="true" selection-start-line="299" selection-start-column="45" selection-end-line="299" selection-end-column="45" />
               <folding>
                 <element signature="e#14#156#0" expanded="true" />
               </folding>
@@ -133,6 +133,7 @@
       <find>libDir</find>
       <find>%s</find>
       <find>sampleDir</find>
+      <find>UpdateSol</find>
     </findStrings>
     <replaceStrings>
       <replace>Println</replace>
@@ -650,8 +651,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="339">
-          <caret line="184" column="65" selection-start-line="184" selection-start-column="65" selection-end-line="184" selection-end-column="65" />
+        <state relative-caret-position="228">
+          <caret line="299" column="45" lean-forward="true" selection-start-line="299" selection-start-column="45" selection-end-line="299" selection-end-column="45" />
           <folding>
             <element signature="e#14#156#0" expanded="true" />
           </folding>
