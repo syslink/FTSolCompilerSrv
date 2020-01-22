@@ -425,7 +425,7 @@ type ContractInfo struct {
 func compileSolHandler(w http.ResponseWriter, chainName string, accountName string, solFileName string) {
 	accountPath := rootDir + chainName + "/" +  accountName + "/"
 	now := time.Now().Unix()
-	cmd := exec.Command("solc", "/libs/=" + libDir + "/" + chainName, "--abi", "--bin", "-o", accountPath, "--overwrite", accountPath + solFileName)
+	cmd := exec.Command("solc", "/libs/=" + libDir + chainName + "/", "--abi", "--bin", "-o", accountPath, "--overwrite", accountPath + solFileName)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
