@@ -37,7 +37,6 @@ type SolInfo struct {
 }
 
 const rootDir = "./data/"
-const libDir = "/usr/local/lib/solidity/"
 
 func main() {
 	var port int
@@ -126,7 +125,7 @@ func querySampleCode(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")             //返回数据格式是json
 
 	var formatter render.Render
-	err, fileInfoMap := querySolFile(libDir + r.URL.RawQuery + "/samples/")
+	err, fileInfoMap := querySolFile(rootDir + r.URL.RawQuery + "/samples/")
 	if err != nil {
 		responseErr(w, err.Error())
 		return
@@ -182,7 +181,7 @@ func queryLibs(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")             //返回数据格式是json
 
 	var formatter render.Render
-	err, fileInfoMap := querySolFile(libDir + r.URL.RawQuery + "/")
+	err, fileInfoMap := querySolFile(rootDir + r.URL.RawQuery + "/libs/")
 	if err != nil {
 		responseErr(w, err.Error())
 		return
