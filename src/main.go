@@ -34,6 +34,7 @@ type SolInfo struct {
 	SolFileName string `json:"solFileName"`
 	NewSolFileName string `json:"newSolFileName"`
 	SolFileContent string `json:"solFileContent"`
+	SolVersion string `json:"solVersion"`
 }
 
 const rootDir = "./data/"
@@ -218,7 +219,7 @@ func processSol(w http.ResponseWriter, r *http.Request) {
 			case RenameSol:
 				renameSolHandler(w, solInfo.ChainName, solInfo.AccountName, solInfo.SolFileName, solInfo.NewSolFileName)
 			case CompileSol:
-				compileSolHandler(w, solInfo.ChainName, solInfo.AccountName, solInfo.SolFileName)
+				compileSolHandler(w, solInfo.ChainName, solInfo.AccountName, solInfo.SolFileName, solInfo.SolVersion)
 			case ListSharedAccount:
 				listSharedSolHandler(w, solInfo.ChainName, solInfo.AccountName, solInfo.SharedAccountName)
 			case GetSharedSol:
@@ -421,11 +422,11 @@ type ContractInfo struct {
 	Bin string `json:"bin"`
 }
 
-func compileSolHandler(w http.ResponseWriter, chainName string, accountName string, solFileName string) {
+func compileSolHandler(w http.ResponseWriter, chainName string, accountName string, solFileName string, solVersion string) {
 	accountPath := rootDir + chainName + "/" +  accountName + "/"
 	absPath, _ := os.Getwd()
 	now := time.Now().Unix()
-	cmd := exec.Command("solc", "--allow-paths", absPath + "/data/" + chainName + "/libs/", "--abi", "--bin", "-o", accountPath, "--overwrite", accountPath + solFileName)
+	cmd := exec.Command("solc-static-linux." + solVersion, "--allow-paths", absPath + "/data/" + chainName + "/libs/", "--abi", "--bin", "-o", accountPath, "--overwrite", accountPath + solFileName)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
 	cmd.Stdout = &out
